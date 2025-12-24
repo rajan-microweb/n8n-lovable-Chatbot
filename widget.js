@@ -493,7 +493,7 @@
             if (!allowedUrl) throw new Error("No website_url configured for this chatbot");
             // Normalize domain (strip protocol, www, trailing slash)
             // const allowedDomain = allowedUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
-            const allowedDomain = allowedUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+            const allowedDomain = "n8n-lovable-chatbot.vercel.app";
             const currentDomain = window.location.hostname.replace(/^www\./, '');
             if (!currentDomain.endsWith(allowedDomain)) {
                 showError(
