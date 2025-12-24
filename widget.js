@@ -494,6 +494,7 @@
             // Normalize domain (strip protocol, www, trailing slash)
             // const allowedDomain = allowedUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
             const allowedDomain = "n8n-lovable-chatbot.vercel.app";
+            // const allowedDomain = "127.0.0.1";
             const currentDomain = window.location.hostname.replace(/^www\./, '');
             if (!currentDomain.endsWith(allowedDomain)) {
                 showError(
@@ -540,31 +541,23 @@
     async function main() {
         const valid = await fetchChatbotDetailsAndValidate();
         if (!valid) return;
-        // 2. STYLES: Inject CSS into the Head
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = "https://dlailtdjekfrovsdxepm.supabase.co/storage/v1/object/public/chatbot-assets//styles.css";
-        document.head.appendChild(link);
 
-        // ---------------------------------------------------------
-        // 3. HTML: Create the Widget Structure
-        // ---------------------------------------------------------
-        // Only render the toggle button initially (remove overlay)
-        const container = document.createElement("div");
-        container.id = "mw-chatbot-container";
-        container.className = "mw-chatbot-container";
-
-        // ✅ NEW: Set the CSS variable dynamically
-        container.style.setProperty('--mw-primary-color', chatbotColor);
-
-        container.innerHTML = `
-            <button class="mw-chat-toggle" id="mw-chatToggle" style="position:fixed;bottom:32px;right:32px;z-index:9999;">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
-                </svg>
-            </button>
-        `;
-        document.body.appendChild(container);
+        // Only create the container and toggle button ONCE, here
+        let container = document.getElementById("mw-chatbot-container");
+        if (!container) {
+            container = document.createElement("div");
+            container.id = "mw-chatbot-container";
+            container.className = "mw-chatbot-container";
+            container.style.setProperty('--mw-primary-color', chatbotColor);
+            container.innerHTML = `
+                <button class="mw-chat-toggle" id="mw-chatToggle" style="position:fixed;bottom:32px;right:32px;z-index:9999;">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+                    </svg>
+                </button>
+            `;
+            document.body.appendChild(container);
+        }
 
         // ---------------------------------------------------------
         // 4. LOGIC: The Chatbot Class (Refactored)
