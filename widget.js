@@ -122,8 +122,8 @@
             let allowedUrl = chatbotData.website_url || "";
             if (!allowedUrl) throw new Error("No website_url configured for this chatbot");
             // Normalize domain (strip protocol, www, trailing slash)
-            // const allowedDomain = allowedUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
-            const allowedDomain = "n8n-lovable-chatbot.vercel.app";
+            const allowedDomain = allowedUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+            // const allowedDomain = "n8n-lovable-chatbot.vercel.app";
             // const allowedDomain = "127.0.0.1";
             const currentDomain = window.location.hostname.replace(/^www\./, '');
             if (!currentDomain.endsWith(allowedDomain)) {
@@ -175,6 +175,9 @@
 
     // --- NEW: Main entry point with validation ---
     async function main() {
+        // --- ADD: Conversation history array (in-memory) ---
+        let conversationHistory = [];
+
         const valid = await fetchChatbotDetailsAndValidate();
         if (!valid) return;
 
@@ -528,8 +531,8 @@
                 this.autoResizeTextarea();
                 this.addMessage(message, "user");
 
-                // --- ADD: Store user message in conversation history ---
-                conversationHistory.push({ role: 'user', content: message });
+                // --- ADD: Add user message to conversation history ---
+                conversationHistory.push({ role: "user", content: message });
 
                 this.showTypingIndicator();
 
@@ -540,7 +543,7 @@
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             message: message,
-                            sessionId: this.sessionId,
+                            sessionId: this.sessionId, // sessionId is already included here
                             userId: userId,
                             integrationId: integrationId,
                             chatbotId: chatbotId,
@@ -561,13 +564,15 @@
                     this.hideTypingIndicator();
                     this.addBotMessage(data.response);
 
-                    // --- ADD: Store bot response in conversation history ---
-                    conversationHistory.push({ role: 'assistant', content: data.response });
+                    // --- ADD: Add bot response to conversation history ---
+                    conversationHistory.push({ role: "assistant", content: data.response });
 
                 } catch (error) {
                     console.error(error);
                     this.hideTypingIndicator();
                     this.addBotMessage("⚠️ Sorry, I'm having trouble connecting right now.");
+                    // Optionally: Add error to history as assistant message
+                    conversationHistory.push({ role: "assistant", content: "⚠️ Sorry, I'm having trouble connecting right now." });
                 }
             }
 
