@@ -146,6 +146,9 @@
             // --- ADD: Store custom_prompt if present ---
             if (chatbotData.custom_prompt) customPrompt = chatbotData.custom_prompt;
             // --- END ADD ---
+            // --- ADD: Store links_data if present ---
+            if (chatbotData.links_data) linksData = chatbotData.links_data;
+            // --- END ADD ---
             return true;
         } catch (err) {
             showError("Chatbot Error: " + err.message);
@@ -540,7 +543,9 @@
                             companyName: companyName,
                             collection: qdrant_collection,
                             // --- ADD: Send customPrompt ---
-                            customPrompt: customPrompt
+                            customPrompt: customPrompt,
+                            // --- ADD: Send linksData ---
+                            links_data: linksData
                             // --- END ADD ---
                         })
                     });
