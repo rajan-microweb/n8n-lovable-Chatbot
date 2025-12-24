@@ -143,6 +143,9 @@
             if (Array.isArray(chatbotData.chatbot_buttons) && chatbotData.chatbot_buttons.length > 0) {
                 currentScript.setAttribute("data-quick-replies", JSON.stringify(chatbotData.chatbot_buttons));
             }
+            // --- ADD: Store custom_prompt if present ---
+            if (chatbotData.custom_prompt) customPrompt = chatbotData.custom_prompt;
+            // --- END ADD ---
             return true;
         } catch (err) {
             showError("Chatbot Error: " + err.message);
@@ -535,7 +538,10 @@
                             integrationId: integrationId,
                             chatbotId: chatbotId,
                             companyName: companyName,
-                            collection: qdrant_collection
+                            collection: qdrant_collection,
+                            // --- ADD: Send customPrompt ---
+                            customPrompt: customPrompt
+                            // --- END ADD ---
                         })
                     });
 
