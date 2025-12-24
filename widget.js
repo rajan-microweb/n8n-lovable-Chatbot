@@ -527,6 +527,10 @@
                 this.messageInput.value = "";
                 this.autoResizeTextarea();
                 this.addMessage(message, "user");
+
+                // --- ADD: Store user message in conversation history ---
+                conversationHistory.push({ role: 'user', content: message });
+
                 this.showTypingIndicator();
 
                 try {
@@ -536,7 +540,7 @@
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             message: message,
-                            sessionId: this.sessionId, // sessionId is already included here
+                            sessionId: this.sessionId,
                             userId: userId,
                             integrationId: integrationId,
                             chatbotId: chatbotId,
@@ -545,8 +549,9 @@
                             // --- ADD: Send customPrompt ---
                             customPrompt: customPrompt,
                             // --- ADD: Send linksData ---
-                            links_data: linksData
-                            // --- END ADD ---
+                            links_data: linksData,
+                            // --- ADD: Send last 10 messages as chat_history ---
+                            chat_history: conversationHistory.slice(-10)
                         })
                     });
 
@@ -555,6 +560,9 @@
 
                     this.hideTypingIndicator();
                     this.addBotMessage(data.response);
+
+                    // --- ADD: Store bot response in conversation history ---
+                    conversationHistory.push({ role: 'assistant', content: data.response });
 
                 } catch (error) {
                     console.error(error);

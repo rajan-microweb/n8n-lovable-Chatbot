@@ -45,8 +45,7 @@
     // ---------------------------------------------------------
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    // link.href = "https://dlailtdjekfrovsdxepm.supabase.co/storage/v1/object/public/chatbot-assets//styles.css"; // 🔴 PASTE YOUR CSS URL HERE
-    link.href = "./styles.css"; // 🔴 PASTE YOUR CSS URL HERE
+    link.href = "https://dlailtdjekfrovsdxepm.supabase.co/storage/v1/object/public/chatbot-assets//styles.css"; // 🔴 PASTE YOUR CSS URL HERE
     document.head.appendChild(link);
 
     // ---------------------------------------------------------
@@ -82,59 +81,31 @@
 
             this.isOpen = false;
             this.isInitialized = false;
-            this.isAnimating = false; // Prevent double open/close during animation
-
-            // Chat icon SVGs
-            this.chatIconSVG = `<svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
-            </svg>`;
-            this.plusIconSVG = `<svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
-            </svg>`;
-
-            this.handleAnimationEnd = this.handleAnimationEnd.bind(this);
-            this.handleToggleClick = this.toggleChat.bind(this);
-            this.handleOverlayClick = this.closeChat.bind(this);
 
             this.initializeEventListeners();
         }
 
         initializeEventListeners() {
-            // Remove previous listeners to avoid stacking
-            this.chatToggle.onclick = null;
-            this.chatToggle.removeEventListener("click", this.handleToggleClick);
-            this.chatToggle.addEventListener("click", this.handleToggleClick);
-
-            this.chatOverlay.onclick = null;
-            this.chatOverlay.removeEventListener("click", this.handleOverlayClick);
-            this.chatOverlay.addEventListener("click", this.handleOverlayClick);
-
+            this.chatToggle.addEventListener("click", () => this.toggleChat());
+            this.chatOverlay.addEventListener("click", () => this.closeChat());
+            // Add these listeners after widget is created
             if (this.messageInput && this.sendButton) {
-                this.sendButton.onclick = null;
                 this.sendButton.addEventListener("click", () => this.handleSendMessage());
-                this.messageInput.onkeydown = null;
                 this.messageInput.addEventListener("keydown", (e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
                         this.handleSendMessage();
                     }
                 });
-                this.messageInput.oninput = null;
                 this.messageInput.addEventListener("input", () => this.autoResizeTextarea());
             }
         }
 
         toggleChat() {
-            if (this.isAnimating) return;
-            if (this.isOpen) {
-                this.closeChat();
-            } else {
-                this.openChat();
-            }
+            this.isOpen ? this.closeChat() : this.openChat();
         }
 
         openChat() {
-            if (this.isOpen || this.isAnimating) return;
             if (!this.chatWidget) {
                 // Create chat widget only when opened
                 this.chatWidget = document.createElement("div");
@@ -202,25 +173,9 @@
                 this.initializeEventListeners();
                 this.autoResizeTextarea();
             }
-            // Remove any previous animationend listeners
-            this.chatWidget.removeEventListener("animationend", this.handleAnimationEnd);
-
-            // Animation: Remove closing, add opening
-            this.chatWidget.classList.remove("mw-chat-closing");
-            this.chatWidget.classList.add("mw-chat-opening");
             this.chatWidget.classList.add("active");
             this.chatToggle.classList.add("active");
             this.chatOverlay.classList.add("active");
-
-            // Remove animation class after animation ends
-            this.chatWidget.addEventListener("animationend", this.handleAnimationEnd);
-
-            // Change icon to plus
-            this.chatToggle.innerHTML = this.plusIconSVG;
-            this.initializeEventListeners();
-
-            this.isAnimating = true;
-            this.animatingAction = "open";
 
             // Show welcome message on first open
             if (!this.isInitialized) {
@@ -232,40 +187,11 @@
         }
 
         closeChat() {
-            if (!this.isOpen || this.isAnimating) return;
             if (this.chatWidget) {
-                // Remove any previous animationend listeners
-                this.chatWidget.removeEventListener("animationend", this.handleAnimationEnd);
-
-                // Animation: Remove opening, add closing
-                this.chatWidget.classList.remove("mw-chat-opening");
-                this.chatWidget.classList.add("mw-chat-closing");
-                this.chatWidget.addEventListener("animationend", this.handleAnimationEnd);
+                this.chatWidget.classList.remove("active");
             }
             this.chatToggle.classList.remove("active");
             this.chatOverlay.classList.remove("active");
-
-            // Change icon back to chat
-            this.chatToggle.innerHTML = this.chatIconSVG;
-            this.initializeEventListeners();
-
-            this.isAnimating = true;
-            this.animatingAction = "close";
-        }
-
-        handleAnimationEnd(e) {
-            if (!this.chatWidget) return;
-            if (this.animatingAction === "open") {
-                this.chatWidget.classList.remove("mw-chat-opening");
-                this.isOpen = true;
-            } else if (this.animatingAction === "close") {
-                this.chatWidget.classList.remove("active");
-                this.chatWidget.classList.remove("mw-chat-closing");
-                this.isOpen = false;
-            }
-            this.isAnimating = false;
-            this.animatingAction = null;
-            this.chatWidget.removeEventListener("animationend", this.handleAnimationEnd);
         }
 
         autoResizeTextarea() {
@@ -464,8 +390,6 @@
     if (document.readyState === "complete" || document.readyState === "interactive") {
         new ChatbotWidget();
     } else {
-        document.addEventListener("DOMContentLoaded", () => {
-            new ChatbotWidget();
-        });
+        document.addEventListener("DOMContentLoaded", () => new ChatbotWidget());
     }
 })();

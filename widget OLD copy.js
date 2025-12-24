@@ -4,6 +4,8 @@
     // ---------------------------------------------------------
     const currentScript = document.currentScript;
     const userId = currentScript.getAttribute("data-user-id");
+    const integrationId = currentScript.getAttribute("data-integration-id");
+    const chatbotId = currentScript.getAttribute("data-chatbot-id");
     const qdrant_collection = currentScript.getAttribute("data-qdrant-collection");
     const companyName = currentScript.getAttribute("data-company-name");
     // NEW: Read the logo URL, fallback to a default if missing
@@ -15,6 +17,8 @@
     // ✅ NEW: Read and parse the dynamic buttons
     const quickRepliesData = currentScript.getAttribute("data-quick-replies");
     let quickReplies = [];
+
+    const autoPopUp = currentScript.getAttribute("auto-pop-up") === "true";
 
     // Default fallback buttons if none are provided
     const defaultButtons = [
@@ -46,12 +50,13 @@
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = "https://dlailtdjekfrovsdxepm.supabase.co/storage/v1/object/public/chatbot-assets//styles.css"; // 🔴 PASTE YOUR CSS URL HERE
+    // link.href = "./styles.css"; // 🔴 PASTE YOUR CSS URL HERE
     document.head.appendChild(link);
 
     // ---------------------------------------------------------
     // 3. HTML: Create the Widget Structure
     // ---------------------------------------------------------
-    // Only render the toggle button and overlay initially
+    // Only render the toggle button initially (remove overlay)
     const container = document.createElement("div");
     container.id = "mw-chatbot-container";
     container.className = "mw-chatbot-container";
@@ -60,7 +65,6 @@
     container.style.setProperty('--mw-primary-color', chatbotColor);
 
     container.innerHTML = `
-        <div class="mw-chat-overlay" id="mw-chatOverlay"></div>
         <button class="mw-chat-toggle" id="mw-chatToggle" style="position:fixed;bottom:32px;right:32px;z-index:9999;">
             <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
@@ -76,36 +80,47 @@
         constructor() {
             this.container = document.getElementById("mw-chatbot-container");
             this.chatToggle = this.container.querySelector("#mw-chatToggle");
-            this.chatOverlay = this.container.querySelector("#mw-chatOverlay");
             this.chatWidget = null; // Will be created on open
 
             this.isOpen = false;
             this.isInitialized = false;
+            this.isAnimating = false; // Prevent double open/close during animation
+
+            // Chat icon SVGs
+            this.chatIconSVG = `<svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+            </svg>`;
+            this.plusIconSVG = `<svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+            </svg>`;
+
+            this.handleAnimationEnd = this.handleAnimationEnd.bind(this);
+            this.handleToggleClick = this.toggleChat.bind(this);
 
             this.initializeEventListeners();
         }
 
         initializeEventListeners() {
-            this.chatToggle.addEventListener("click", () => this.toggleChat());
-            this.chatOverlay.addEventListener("click", () => this.closeChat());
-            // Add these listeners after widget is created
-            if (this.messageInput && this.sendButton) {
-                this.sendButton.addEventListener("click", () => this.handleSendMessage());
-                this.messageInput.addEventListener("keydown", (e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        this.handleSendMessage();
-                    }
-                });
-                this.messageInput.addEventListener("input", () => this.autoResizeTextarea());
-            }
+            // Remove previous listeners to avoid stacking
+            this.chatToggle.onclick = null;
+            this.chatToggle.removeEventListener("click", this.handleToggleClick);
+            this.chatToggle.addEventListener("click", this.handleToggleClick);
+
+            // Overlay logic removed
+            // ...existing code...
         }
 
         toggleChat() {
-            this.isOpen ? this.closeChat() : this.openChat();
+            if (this.isAnimating) return;
+            if (this.isOpen) {
+                this.closeChat();
+            } else {
+                this.openChat();
+            }
         }
 
         openChat() {
+            if (this.isOpen || this.isAnimating) return;
             if (!this.chatWidget) {
                 // Create chat widget only when opened
                 this.chatWidget = document.createElement("div");
@@ -159,6 +174,16 @@
                 this.sendButton = this.chatWidget.querySelector("#mw-sendButton");
                 this.typingIndicator = this.chatWidget.querySelector("#mw-typingIndicator");
 
+                // --- ADD: Attach send button and Enter key event listeners ---
+                this.sendButton.onclick = () => this.handleSendMessage();
+                this.messageInput.onkeydown = (e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        this.handleSendMessage();
+                    }
+                };
+                // --- END ADD ---
+
                 // Session ID Logic (Persistent across page reloads)
                 this.sessionId = localStorage.getItem("mw_chat_session_id");
                 if (!this.sessionId) {
@@ -173,9 +198,25 @@
                 this.initializeEventListeners();
                 this.autoResizeTextarea();
             }
+            // Remove any previous animationend listeners
+            this.chatWidget.removeEventListener("animationend", this.handleAnimationEnd);
+
+            // Animation: Remove closing, add opening
+            this.chatWidget.classList.remove("mw-chat-closing");
+            this.chatWidget.classList.add("mw-chat-opening");
             this.chatWidget.classList.add("active");
             this.chatToggle.classList.add("active");
-            this.chatOverlay.classList.add("active");
+            // Overlay logic removed
+
+            // Remove animation class after animation ends
+            this.chatWidget.addEventListener("animationend", this.handleAnimationEnd);
+
+            // Change icon to plus
+            this.chatToggle.innerHTML = this.plusIconSVG;
+            this.initializeEventListeners();
+
+            this.isAnimating = true;
+            this.animatingAction = "open";
 
             // Show welcome message on first open
             if (!this.isInitialized) {
@@ -187,11 +228,40 @@
         }
 
         closeChat() {
+            if (!this.isOpen || this.isAnimating) return;
             if (this.chatWidget) {
-                this.chatWidget.classList.remove("active");
+                // Remove any previous animationend listeners
+                this.chatWidget.removeEventListener("animationend", this.handleAnimationEnd);
+
+                // Animation: Remove opening, add closing
+                this.chatWidget.classList.remove("mw-chat-opening");
+                this.chatWidget.classList.add("mw-chat-closing");
+                this.chatWidget.addEventListener("animationend", this.handleAnimationEnd);
             }
             this.chatToggle.classList.remove("active");
-            this.chatOverlay.classList.remove("active");
+            // Overlay logic removed
+
+            // Change icon back to chat
+            this.chatToggle.innerHTML = this.chatIconSVG;
+            this.initializeEventListeners();
+
+            this.isAnimating = true;
+            this.animatingAction = "close";
+        }
+
+        handleAnimationEnd(e) {
+            if (!this.chatWidget) return;
+            if (this.animatingAction === "open") {
+                this.chatWidget.classList.remove("mw-chat-opening");
+                this.isOpen = true;
+            } else if (this.animatingAction === "close") {
+                this.chatWidget.classList.remove("active");
+                this.chatWidget.classList.remove("mw-chat-closing");
+                this.isOpen = false;
+            }
+            this.isAnimating = false;
+            this.animatingAction = null;
+            this.chatWidget.removeEventListener("animationend", this.handleAnimationEnd);
         }
 
         autoResizeTextarea() {
@@ -345,7 +415,9 @@
                     body: JSON.stringify({
                         message: message,
                         sessionId: this.sessionId,
-                        userId: userId,  // 🔴 USES THE ID FROM THE SCRIPT TAG
+                        userId: userId,
+                        integrationId: integrationId,
+                        chatbotId: chatbotId,
                         companyName: companyName,
                         collection: qdrant_collection
                     })
@@ -388,8 +460,18 @@
     // 5. INITIALIZATION: Run the Widget
     // ---------------------------------------------------------
     if (document.readyState === "complete" || document.readyState === "interactive") {
-        new ChatbotWidget();
+        const widget = new ChatbotWidget();
+        if (autoPopUp) {
+            widget.openChat(); // Open chatbot automatically on load
+        }
+        // Otherwise, wait for manual open (toggle button)
     } else {
-        document.addEventListener("DOMContentLoaded", () => new ChatbotWidget());
+        document.addEventListener("DOMContentLoaded", () => {
+            const widget = new ChatbotWidget();
+            if (autoPopUp) {
+                widget.openChat(); // Open chatbot automatically on load
+            }
+            // Otherwise, wait for manual open (toggle button)
+        });
     }
 })();
