@@ -49,8 +49,8 @@
     // ---------------------------------------------------------
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "https://dlailtdjekfrovsdxepm.supabase.co/storage/v1/object/public/chatbot-assets//styles.css"; // 🔴 PASTE YOUR CSS URL HERE
-    // link.href = "./styles.css"; // 🔴 PASTE YOUR CSS URL HERE
+    // link.href = "https://dlailtdjekfrovsdxepm.supabase.co/storage/v1/object/public/chatbot-assets//styles.css"; // 🔴 PASTE YOUR CSS URL HERE
+    link.href = "./styles.css"; // 🔴 PASTE YOUR CSS URL HERE
     document.head.appendChild(link);
 
     // ---------------------------------------------------------
