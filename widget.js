@@ -58,14 +58,14 @@
     // ---------------------------------------------------------
     // Only render the toggle button initially (remove overlay)
     const container = document.createElement("div");
-    container.id = "mw-chatbot-container";
-    container.className = "mw-chatbot-container";
+    container.id = "rm-chatbot-container";
+    container.className = "rm-chatbot-container";
 
     // ✅ NEW: Set the CSS variable dynamically
-    container.style.setProperty('--mw-primary-color', chatbotColor);
+    container.style.setProperty('--rm-primary-color', chatbotColor);
 
     container.innerHTML = `
-        <button class="mw-chat-toggle" id="mw-chatToggle" style="position:fixed;bottom:32px;right:32px;z-index:9999;">
+        <button class="rm-chat-toggle" id="rm-chatToggle" style="position:fixed;bottom:32px;right:32px;z-index:9999;">
             <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
             </svg>
@@ -99,7 +99,7 @@
             const resp = await fetch("https://dlailtdjekfrovsdxepm.supabase.co/functions/v1/get-chatbots-data?chatbot_id=" + encodeURIComponent(chatbotId), {
                 headers: {
                     // FIX: Use the raw API key string, no =, no quotes
-                    "x-api-key": "^5H|;eSOWHlBcr:\"Bp4[6fF8Z$oI&|"
+                    "x-api-key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkMjgwYTQ4Yi1hOTI1LTQxMTYtOTQ3Ny01NjFhMDRlZWNjNWQiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzY3NzYyNDMyfQ.eeVQuZdquGfmFtcjh6oH5RBv26P5tP1IwMxO6I5ZWQ4"
                 }
             });
             if (!resp.ok) throw new Error("Failed to fetch chatbot details");
@@ -121,10 +121,9 @@
             // Extract allowed domain from website_url
             let allowedUrl = chatbotData.website_url || "";
             if (!allowedUrl) throw new Error("No website_url configured for this chatbot");
-            // Normalize domain (strip protocol, www, trailing slash)
-            const allowedDomain = allowedUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+            // const allowedDomain = allowedUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
             // const allowedDomain = "n8n-lovable-chatbot.vercel.app";
-            // const allowedDomain = "127.0.0.1";
+            const allowedDomain = "127.0.0.1";
             const currentDomain = window.location.hostname.replace(/^www\./, '');
             if (!currentDomain.endsWith(allowedDomain)) {
                 showError(
@@ -158,11 +157,11 @@
 
     // --- NEW: Show error message in place of widget ---
     function showError(msg) {
-        let container = document.getElementById("mw-chatbot-container");
+        let container = document.getElementById("rm-chatbot-container");
         if (!container) {
             container = document.createElement("div");
-            container.id = "mw-chatbot-container";
-            container.className = "mw-chatbot-container";
+            container.id = "rm-chatbot-container";
+            container.className = "rm-chatbot-container";
             document.body.appendChild(container);
         }
         container.innerHTML = `
@@ -182,14 +181,14 @@
         if (!valid) return;
 
         // Only create the container and toggle button ONCE, here
-        let container = document.getElementById("mw-chatbot-container");
+        let container = document.getElementById("rm-chatbot-container");
         if (!container) {
             container = document.createElement("div");
-            container.id = "mw-chatbot-container";
-            container.className = "mw-chatbot-container";
-            container.style.setProperty('--mw-primary-color', chatbotColor);
+            container.id = "rm-chatbot-container";
+            container.className = "rm-chatbot-container";
+            container.style.setProperty('--rm-primary-color', chatbotColor);
             container.innerHTML = `
-                <button class="mw-chat-toggle" id="mw-chatToggle" style="position:fixed;bottom:32px;right:32px;z-index:9999;">
+                <button class="rm-chat-toggle" id="rm-chatToggle" style="position:fixed;bottom:32px;right:32px;z-index:9999;">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
                     </svg>
@@ -203,8 +202,8 @@
         // ---------------------------------------------------------
         class ChatbotWidget {
             constructor() {
-                this.container = document.getElementById("mw-chatbot-container");
-                this.chatToggle = this.container.querySelector("#mw-chatToggle");
+                this.container = document.getElementById("rm-chatbot-container");
+                this.chatToggle = this.container.querySelector("#rm-chatToggle");
                 this.chatWidget = null; // Will be created on open
 
                 this.isOpen = false;
@@ -249,55 +248,55 @@
                 if (!this.chatWidget) {
                     // Create chat widget only when opened
                     this.chatWidget = document.createElement("div");
-                    this.chatWidget.className = "mw-chat-widget";
-                    this.chatWidget.id = "mw-chatWidget";
+                    this.chatWidget.className = "rm-chat-widget";
+                    this.chatWidget.id = "rm-chatWidget";
                     this.chatWidget.innerHTML = `
-                        <div class="mw-chat-header">
-                            <div class="mw-chat-header-content">
-                                <div class="mw-chat-logo">
+                        <div class="rm-chat-header">
+                            <div class="rm-chat-header-content">
+                                <div class="rm-chat-logo">
                                     <img src="${logoUrl}" alt="Logo"> 
                                 </div>
                                 <div>
                                     <h3>AI Assistant</h3>
-                                    <div class="mw-chat-status">
-                                        <div class="mw-status-dot"></div>
+                                    <div class="rm-chat-status">
+                                        <div class="rm-status-dot"></div>
                                         <span>Online</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="mw-messages-container" id="mw-messagesContainer">
-                            <div class="mw-empty-state">
+                        <div class="rm-messages-container" id="rm-messagesContainer">
+                            <div class="rm-empty-state">
                                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" /></svg>
                                 <div>Start a conversation</div>
                             </div>
                         </div>
-                        <div class="mw-typing-indicator" id="mw-typingIndicator">
-                            <div class="mw-typing-dots">
-                                <div class="mw-typing-dot"></div>
-                                <div class="mw-typing-dot"></div>
-                                <div class="mw-typing-dot"></div>
+                        <div class="rm-typing-indicator" id="rm-typingIndicator">
+                            <div class="rm-typing-dots">
+                                <div class="rm-typing-dot"></div>
+                                <div class="rm-typing-dot"></div>
+                                <div class="rm-typing-dot"></div>
                             </div>
                         </div>
-                        <div class="mw-input-container">
-                            <div class="mw-input-wrapper">
-                                <textarea id="mw-messageInput" placeholder="Type your message..." rows="1"></textarea>
+                        <div class="rm-input-container">
+                            <div class="rm-input-wrapper">
+                                <textarea id="rm-messageInput" placeholder="Type your message..." rows="1"></textarea>
                             </div>
-                            <button class="mw-send-button" id="mw-sendButton" type="button">
+                            <button class="rm-send-button" id="rm-sendButton" type="button">
                                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
                             </button>
                         </div>
-                        <div class="mw-chat-footer">
+                        <div class="rm-chat-footer">
                             <p>Powered by <u><a href="https://www.microwebtec.com/" target="_blank">Microweb Software</a></u></p>
                         </div>
                     `;
                     this.container.appendChild(this.chatWidget);
 
                     // Setup references for widget elements
-                    this.messagesContainer = this.chatWidget.querySelector("#mw-messagesContainer");
-                    this.messageInput = this.chatWidget.querySelector("#mw-messageInput");
-                    this.sendButton = this.chatWidget.querySelector("#mw-sendButton");
-                    this.typingIndicator = this.chatWidget.querySelector("#mw-typingIndicator");
+                    this.messagesContainer = this.chatWidget.querySelector("#rm-messagesContainer");
+                    this.messageInput = this.chatWidget.querySelector("#rm-messageInput");
+                    this.sendButton = this.chatWidget.querySelector("#rm-sendButton");
+                    this.typingIndicator = this.chatWidget.querySelector("#rm-typingIndicator");
 
                     // --- ADD: Attach send button and Enter key event listeners ---
                     this.sendButton.onclick = () => this.handleSendMessage();
@@ -327,8 +326,8 @@
                 this.chatWidget.removeEventListener("animationend", this.handleAnimationEnd);
 
                 // Animation: Remove closing, add opening
-                this.chatWidget.classList.remove("mw-chat-closing");
-                this.chatWidget.classList.add("mw-chat-opening");
+                this.chatWidget.classList.remove("rm-chat-closing");
+                this.chatWidget.classList.add("rm-chat-opening");
                 this.chatWidget.classList.add("active");
                 this.chatToggle.classList.add("active");
                 // Overlay logic removed
@@ -359,8 +358,8 @@
                     this.chatWidget.removeEventListener("animationend", this.handleAnimationEnd);
 
                     // Animation: Remove opening, add closing
-                    this.chatWidget.classList.remove("mw-chat-opening");
-                    this.chatWidget.classList.add("mw-chat-closing");
+                    this.chatWidget.classList.remove("rm-chat-opening");
+                    this.chatWidget.classList.add("rm-chat-closing");
                     this.chatWidget.addEventListener("animationend", this.handleAnimationEnd);
                 }
                 this.chatToggle.classList.remove("active");
@@ -377,11 +376,11 @@
             handleAnimationEnd(e) {
                 if (!this.chatWidget) return;
                 if (this.animatingAction === "open") {
-                    this.chatWidget.classList.remove("mw-chat-opening");
+                    this.chatWidget.classList.remove("rm-chat-opening");
                     this.isOpen = true;
                 } else if (this.animatingAction === "close") {
                     this.chatWidget.classList.remove("active");
-                    this.chatWidget.classList.remove("mw-chat-closing");
+                    this.chatWidget.classList.remove("rm-chat-closing");
                     this.isOpen = false;
                 }
                 this.isAnimating = false;
@@ -395,26 +394,26 @@
             }
 
             addMessage(content, type) {
-                const emptyState = this.messagesContainer.querySelector(".mw-empty-state");
+                const emptyState = this.messagesContainer.querySelector(".rm-empty-state");
                 if (emptyState) emptyState.remove();
 
                 const messageDiv = document.createElement("div");
-                messageDiv.className = `mw-message ${type}`;
+                messageDiv.className = `rm-message ${type}`;
 
                 if (type === "bot") {
                     const avatarDiv = document.createElement("div");
-                    avatarDiv.className = "mw-bot-avatar";
+                    avatarDiv.className = "rm-bot-avatar";
                     avatarDiv.innerHTML = `<img src="${logoUrl}" alt="Bot">`;
                     messageDiv.appendChild(avatarDiv);
 
                     const contentDiv = document.createElement("div");
-                    contentDiv.className = "mw-message-content";
+                    contentDiv.className = "rm-message-content";
                     contentDiv.innerHTML = this.parseMarkdown(content);
                     messageDiv.appendChild(contentDiv);
                 } else {
                     // User message
                     const contentDiv = document.createElement("div");
-                    contentDiv.className = "mw-message-content";
+                    contentDiv.className = "rm-message-content";
                     contentDiv.textContent = content;
                     messageDiv.appendChild(contentDiv);
                 }
@@ -457,15 +456,15 @@
 
             // showWelcomeMessage() {
             //     const welcomeHTML = `
-            //         <div class="mw-message bot">
-            //             <div class="mw-bot-avatar"><img src="${logoUrl}"></div>
-            //             <div class="mw-message-content">
+            //         <div class="rm-message bot">
+            //             <div class="rm-bot-avatar"><img src="${logoUrl}"></div>
+            //             <div class="rm-message-content">
             //                 <p>${welcomeMessage}</p>
-            //                 <div class="mw-preset-buttons" style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;">
-            //                     <button class="mw-cta-button" data-text="What services do you offer? List all Services...">💼 Our Services</button>
-            //                     <button class="mw-cta-button" data-text="How can I book a consultation?">📅 Book a Consultation</button>
-            //                     <button class="mw-cta-button" data-text="How can I get the contact details of this Company?">📞 Contact Us!</button>
-            //                     <button class="mw-cta-button" data-text="Tell me more about your company">🏢 About the Company</button>
+            //                 <div class="rm-preset-buttons" style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;">
+            //                     <button class="rm-cta-button" data-text="What services do you offer? List all Services...">💼 Our Services</button>
+            //                     <button class="rm-cta-button" data-text="How can I book a consultation?">📅 Book a Consultation</button>
+            //                     <button class="rm-cta-button" data-text="How can I get the contact details of this Company?">📞 Contact Us!</button>
+            //                     <button class="rm-cta-button" data-text="Tell me more about your company">🏢 About the Company</button>
             //                 </div>
             //             </div>
             //         </div>
@@ -473,7 +472,7 @@
             //     this.messagesContainer.innerHTML = welcomeHTML;
 
             //     // Attach event listeners to the dynamic buttons
-            //     const buttons = this.messagesContainer.querySelectorAll(".mw-cta-button");
+            //     const buttons = this.messagesContainer.querySelectorAll(".rm-cta-button");
             //     buttons.forEach(btn => {
             //         btn.addEventListener("click", () => {
             //             const text = btn.getAttribute("data-text");
@@ -494,16 +493,16 @@
                     const text = btn.text || label;
 
                     buttonsHTML += `
-                        <button class="mw-cta-button" data-text="${text}">${label}</button>
+                        <button class="rm-cta-button" data-text="${text}">${label}</button>
                     `;
                 });
 
                 const welcomeHTML = `
-                    <div class="mw-message bot">
-                        <div class="mw-bot-avatar"><img src="${logoUrl}"></div>
-                        <div class="mw-message-content">
+                    <div class="rm-message bot">
+                        <div class="rm-bot-avatar"><img src="${logoUrl}"></div>
+                        <div class="rm-message-content">
                             <p>${welcomeMessage}</p>
-                            <div class="mw-preset-buttons" style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;">
+                            <div class="rm-preset-buttons" style="margin-top:10px; display:flex; gap:5px; flex-wrap:wrap;">
                                 ${buttonsHTML} </div>
                         </div>
                     </div>
@@ -511,7 +510,7 @@
                 this.messagesContainer.innerHTML = welcomeHTML;
 
                 // Attach event listeners to the dynamic buttons
-                const buttons = this.messagesContainer.querySelectorAll(".mw-cta-button");
+                const buttons = this.messagesContainer.querySelectorAll(".rm-cta-button");
                 buttons.forEach(btn => {
                     btn.addEventListener("click", () => {
                         const text = btn.getAttribute("data-text");
@@ -538,7 +537,7 @@
 
                 try {
                     // 🚀 API Call to Backend
-                    const response = await fetch("https://n8n.srv1044933.hstgr.cloud/webhook/chat", {
+                    const response = await fetch("https://n8n.srv1248804.hstgr.cloud/webhook/chat", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
